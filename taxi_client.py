@@ -40,26 +40,25 @@ class thumbsUpData():
          self.cleanThumbsUp=bool(False)
       else:
          self.cleanThumbsUp=bool(True)
-
+   
    def toggleFriendliness(self):
       if (self.friendlyThumbsUp==True):
          self.friendlyThumbsUp=bool(False)
       else:
-         self.friendlyThumbsUp=bool(True)
-
+         self.friendlyThumbsUp=bool(True) 
+        
    def getPromptness(self):
-      return self.promptThumbsUp
-      
+      return self.promptThumbsUp 
       
    def getCleanliness(self):
       return self.cleanThumbsUp
-
-   def getFriendliness(self):
+    
+   def getFriendliness(self):  
       return self.friendlyThumbsUp
-
+    
    def setPromptness(self,value):
       self.promptThumbsUp=value
-
+    
    def setCleanliness(self,value):
       self.promptCleanThumbsUp=value
 
@@ -74,9 +73,9 @@ def main():
    print("{}".format(taxiUUID))
 
    # setup standard curses.
-   stdscr = curses.initscr()       # setup standard curses datastructs for init
-   curses.noecho()              # turnoff automatic echo to the screen.
-   curses.cbreak()                      # then setup keys to react w/o the Enter key.
+   stdscr = curses.initscr()           # setup standard curses datastructs for init
+   curses.noecho()                     # turnoff automatic echo to the screen.
+   curses.cbreak()                     # then setup keys to react w/o the Enter key.
    stdscr.clear()
 
 
@@ -94,6 +93,7 @@ def main():
       c=""
       c=stdscr.getch()
 
+
       if (c == ord('1') and isTimerStarted==0):
          startTime=time.time()
          isTimerStarted=1       # The timer has started.
@@ -106,6 +106,7 @@ def main():
 
          #Everytime we start a ride, we set the ThumbsUp setting to False, meaning no rating set.
          thumbRating.resetAllRatings()
+         thumbRating.printAllRatings(stdscr)
 
       elif (c == ord('2') and isTimerStarted==1):
          isTimerStarted=0
@@ -119,12 +120,21 @@ def main():
 
          elapsedTime=stopTime-startTime
          sendDataDict["elapsedTime"]=elapsedTime
-
-         sendDataDict["promptThumbsUp"]=thumbRating.getPromptness()
+         
+                  sendDataDict["promptThumbsUp"]=thumbRating.getPromptness()
          sendDataDict["cleanThumbsUp"]=thumbRating.getCleanliness()
          sendDataDict["friendlyThumbsUp"]=thumbRating.getFriendliness()
 
+         # Note: the JSON string is almost like the Python object Dictonary, execpt for but confirms to JSON.
+         # ie 'promptThumbsUp': False
+         # is "promptThumbsUp": false etc.
+         # Mostly the same, but changes the type (dict->string), and JSON formatting.
          serialized_dict = json.dumps(sendDataDict)
+
+         # JSON text string.
+         #print(type(serialized_dict))
+         print(serialized_dict)
+
          setupCommunications(serialized_dict)
 
 
@@ -141,8 +151,7 @@ def main():
       elif (c == ord('p') and isTimerStarted==1):
          thumbRating.togglePromptness()
          thumbRating.printAllRatings(stdscr)
-         
-         
+
       elif (c == ord('c') and isTimerStarted==1):
          thumbRating.toggleCleanliness()
          thumbRating.printAllRatings(stdscr)
@@ -162,23 +171,19 @@ def setupCommunications(message):
 
    # get local machine name
    host = socket.gethostname()
-   port = 55555
+   port = 9998
 
    # connection to hostname on the port.
    s.connect((host, port))
 
    # Receive no more than 1024 bytes
    tm = s.send(message)
-  # tm = s.recv(1024)
 
    s.close()
-
-  # print("The time got from the server is %s" % tm.decode('ascii'))
-
 
 if __name__ == "__main__":
    main()
 
 
-         
+
 
